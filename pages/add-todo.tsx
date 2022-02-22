@@ -33,7 +33,7 @@ const AddTodo:NextPage = () => {
         
         try{
             await setDoc(_todo,todoData);
-            setMessage("Todo added successfully");
+            setMessage("Todo added to firebase !");
             setTitle("");
             setDescription("");
         }catch(error){
@@ -68,7 +68,7 @@ const AddTodo:NextPage = () => {
                         message ? (
                             <div className={styles.formGroup}>
                                 <p className={styles.success}>
-                                    {message}. Proceed to <a href="/">Home</a>
+                                    {message}. You cqn go back to <a href="/">Home</a>
                                 </p>
                             </div>
                         ) : null

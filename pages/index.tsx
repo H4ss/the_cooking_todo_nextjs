@@ -7,6 +7,7 @@ import { firestore } from '../firebase/clientApp';
 import { collection, QueryDocumentSnapshot, DocumentData, query, where, limit, getDocs, updateDoc, doc } from "@firebase/firestore";
 
 import { useEffect, useState } from 'react';
+import { deleteDoc } from 'firebase/firestore';
 
 
 
@@ -17,7 +18,6 @@ const Home: NextPage = () => {
 
   useEffect(() => {
     getTodos();
-    // reset loading
     setTimeout(() => {
       setLoading(false);
     }, 2000)
@@ -25,11 +25,11 @@ const Home: NextPage = () => {
 
   const todosCollection = collection(firestore, 'todos');
 
+  // READ
   const getTodos = async () => {
     const todosQuery = query(todosCollection, where('done', '==', false), limit(10));
     const querySnapshot = await getDocs(todosQuery);
 
-    // map through todos adding them to an array
     const result: QueryDocumentSnapshot<DocumentData>[] = [];
     querySnapshot.forEach((snapshot) => {
       result.push(snapshot);
@@ -38,16 +38,22 @@ const Home: NextPage = () => {
     setTodos(result);
   };
 
+  // UPDATE
   const updateTodo = async (documentId: string) => {
-    // create a pointer to the Document id
     const _todo = doc(firestore, `todos/${documentId}`);
-    // update the doc by setting done to true
     await updateDoc(_todo, {
       "done": true
     });
-    // retrieve todos
     getTodos();
-  }
+  };
+
+  // DELETE
+  const deleteTodo = async (documentId:string) => {
+    const _todo = doc(firestore,`todos/${documentId}`);
+    await deleteDoc(_todo);
+    getTodos();
+ }
+
   return (
     <div className={styles.container}>
       <Head>
@@ -70,7 +76,6 @@ const Home: NextPage = () => {
               </div>
             ) :
               todos.length === 0 ? (
-                // console.log(todos),
                 <div className={styles.card}>
                   <h2>No undone todos</h2>
                   <p>Consider adding a todo from <a href="/add-todo">here</a></p>
@@ -85,9 +90,9 @@ const Home: NextPage = () => {
                       {/* <h2>{todo.data.arguments['title']}</h2>
             <p>{todo.data.arguments['description']}</p> */}
                       <div className={styles.cardActions}>
-                        <button type="button" onClick={() => updateTodo(todo.data().id)}>Mark as done</button>
-                        <button type="button">Delete</button>
-                      </div>
+                        <button type="button" onClick={() => updateTodo(todo.id)}>Mark as done</button>
+                        <button type="button" onClick={() => deleteTodo(todo.id)}>Delete</button>
+                        </div>
                     </div>
                   )
                 })
